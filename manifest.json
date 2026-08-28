@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "Higgsfield Autopilot",
+  "version": "2.10.0",
+  "description": "Batch-generate Higgsfield assets from a JSON manifest, then auto-create Elements and file them into folders.",
+  "permissions": [
+    "storage",
+    "alarms",
+    "scripting",
+    "tabs",
+    "clipboardWrite",
+    "notifications",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://higgsfield.ai/*",
+    "https://*.higgsfield.ai/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://higgsfield.ai/*",
+        "https://*.higgsfield.ai/*"
+      ],
+      "js": [
+        "src/selectors.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "Higgsfield Autopilot",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/inject-main.js"
+      ],
+      "matches": [
+        "https://higgsfield.ai/*",
+        "https://*.higgsfield.ai/*"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

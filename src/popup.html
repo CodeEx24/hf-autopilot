@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  :root{--brand:#CDFF00;--bg:#141416;--panel:#1e1e22;--line:#2c2c33;--dim:#8a8a92}
+  body{font:13px/1.45 system-ui,sans-serif;width:450px;margin:0;padding:14px;background:var(--bg);color:#e8e8ea}
+  header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  header img{width:26px;height:26px;border-radius:6px}
+  h1{font-size:14px;margin:0}
+  .sub{font-size:11px;color:#7a7a82}
+  .back{margin-left:auto}
+  fieldset{border:1px solid var(--line);border-radius:8px;padding:10px;margin:0 0 12px}
+  legend{font-size:11px;color:#9a9aa2;padding:0 5px}
+  label{font-size:11px;color:#9a9aa2;display:block;margin:6px 0 3px}
+  input,textarea{width:100%;box-sizing:border-box;background:var(--panel);color:#e8e8ea;border:1px solid #34343a;border-radius:6px;padding:7px}
+  textarea{height:130px;font-family:ui-monospace,monospace;font-size:11px;resize:vertical}
+  button{background:#2a2a30;color:#e8e8ea;border:1px solid #3d3d45;border-radius:6px;padding:6px 11px;cursor:pointer;margin-right:6px;font-size:12px}
+  button.primary{background:var(--brand);color:#111;border-color:var(--brand);font-weight:700}
+  button.link{background:none;border:none;color:var(--dim);padding:2px 4px;margin:0;font-size:10px;text-decoration:underline}
+  button.danger{color:#ff9a9a}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .banner{padding:8px;border-radius:6px;margin-bottom:10px;display:none;font-size:12px}
+  .warn{background:#4a3a12;border:1px solid #7a6320}
+  .err{background:#4a1616;border:1px solid #7a2020;color:#ffc9c9}
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:11px}
+  td{padding:3px 4px;border-bottom:1px solid #26262b;vertical-align:top}
+  .t{color:#6f9ff5;font-size:10px}
+  .s-complete{color:#8ee06a}.s-failed{color:#ff7a7a}.s-pending{color:var(--dim)}
+  .s-generating,.s-generated,.s-element_created{color:#e8c95a}
+  .s-waiting_elements,.s-waiting_ip{color:#7fb4ff}
+  #log{overflow:auto;font-family:ui-monospace,monospace;font-size:10px;color:#9a9aa2;margin-top:4px}
+  #log.collapsed{display:none}
+  .loghead{display:flex;align-items:center;justify-content:space-between;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+  .loghead span{font-size:11px;color:#9a9aa2}
+  /* project cards */
+  .card{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:#191920;cursor:pointer}
+  .card:hover{border-color:#44444e}
+  .card .top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .card .nm{font-weight:600;font-size:13px}
+  .pill{font-size:10px;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
+  .pill.run{background:#2c3a10;border-color:#4d651c;color:var(--brand)}
+  .pill.queue{background:#3a3410;border-color:#65581c;color:#e8c95a}
+  .pill.fail{background:#3a1414;border-color:#651c1c;color:#ff9a9a}
+  .bar{height:5px;background:#26262b;border-radius:3px;overflow:hidden;margin:7px 0 5px}
+  .bar>div{height:100%;background:var(--brand)}
+  .meta{font-size:10px;color:#6a6a72;display:flex;gap:10px;flex-wrap:wrap}
+  .acts{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+  .acts button{margin:0;padding:4px 9px;font-size:11px}
+  .empty{text-align:center;padding:28px 10px;color:var(--dim)}
+</style></head>
+<body>
+  <header>
+    <img src="../icons/icon48.png" alt="">
+    <div>
+      <h1 id="title">Higgsfield Autopilot</h1>
+      <div class="sub" id="subtitle">Projects</div>
+    </div>
+    <button id="back" class="back" style="display:none">← Projects</button>
+  </header>
+
+  <div id="authBanner" class="banner warn"></div>
+  <div id="errBanner" class="banner err"></div>
+
+  <!-- ══ PROJECT LIST ══ -->
+  <section id="viewList">
+    <div id="projects"></div>
+    <div class="row">
+      <button id="addProject" class="primary">+ Add a project</button>
+      <button id="addFromTab">Add from open tab</button>
+    </div>
+    <div id="globalQueue" style="font-size:11px;color:#6a6a72;margin-top:10px"></div>
+
+    <details id="capBox" style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+      <summary style="font-size:11px;color:var(--dim);cursor:pointer">Capture endpoints (advanced)</summary>
+      <div style="font-size:11px;color:#9a9aa2;line-height:1.5;margin-top:8px">
+        1. Press <b>Arm</b> — it survives page reloads<br>
+        2. On higgsfield.ai, do the thing you want recorded (e.g. one video generation)<br>
+        3. Press <b>Copy</b> and send the clipboard contents to Claude
+      </div>
+      <div class="row">
+        <button id="capArm">Arm</button>
+        <button id="capCopy">Copy</button>
+        <button id="capClear">Clear</button>
+        <button id="capDisarm">Disarm</button>
+      </div>
+      <div id="capInfo" style="font-size:11px;color:#8ee06a;margin-top:6px"></div>
+      <div style="font-size:10px;color:#6a6a72;margin-top:4px">
+        Tokens, cookies and session ids are redacted before anything is stored.
+      </div>
+    </details>
+  </section>
+
+  <!-- ══ PROJECT DETAIL ══ -->
+  <section id="viewProject" style="display:none">
+    <fieldset>
+      <legend>Project</legend>
+      <label>Name</label>
+      <input id="projName" placeholder="Pineapple Legend">
+      <label>Project / folder ID <span style="color:#5a5a62">— paste the URL, the id is extracted</span></label>
+      <input id="projId" placeholder="1c753c0e-… or https://higgsfield.ai/generate?projectId=…">
+      <div class="row">
+        <button id="saveProj">Save</button>
+        <button id="detectProj">Detect from tab</button>
+        <span id="projSaved" style="font-size:11px;color:#8ee06a"></span>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Jobs</legend>
+      <textarea id="manifest" placeholder='Paste the manifest JSON'></textarea>
+      <div class="row">
+        <button id="load">Create jobs</button>
+        <button id="exportProj">Export</button>
+      </div>
+    </fieldset>
+
+    <div class="row">
+      <button id="start" class="primary">Start</button>
+      <button id="pause">Pause</button>
+      <button id="resume" class="primary" style="display:none">Resume</button>
+      <button id="sync">Sync now</button>
+      <button id="stop">Stop</button>
+      <button id="retry">Retry failed</button>
+    </div>
+
+    <div id="counts" style="font-size:11px;color:#9a9aa2;margin-top:8px"></div>
+    <table id="jobs"></table>
+
+    <div class="loghead">
+      <span id="logLabel">Log</span>
+      <div>
+        <button id="logMore" class="link">show more</button>
+        <button id="logClear" class="link">clear</button>
+        <button id="logToggle" class="link">hide</button>
+      </div>
+    </div>
+    <div id="log"></div>
+  </section>
+
+  <script src="popup.js"></script>
+</body></html>
